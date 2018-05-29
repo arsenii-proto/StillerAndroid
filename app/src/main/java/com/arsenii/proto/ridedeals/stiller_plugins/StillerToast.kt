@@ -3,6 +3,8 @@ package com.arsenii.proto.ridedeals.stiller_plugins
 import android.content.Context
 import android.widget.Toast
 import com.arsenii.proto.ridedeals.stiller.*
+import com.github.salomonbrys.kotson.jsonObject
+import com.google.gson.JsonObject
 
 class StillerToast: StillerPluginInterface {
 
@@ -11,11 +13,11 @@ class StillerToast: StillerPluginInterface {
 
     override fun start() {
 
-        val toast = StillerObject{
+        val toast = jsonObject(
 
             "short" to object: StillerMethod(){
 
-                override fun handle(arg: StillerObject): StillerObject {
+                override fun handle(arg: JsonObject): JsonObject {
 
                     if( StillerApi.hasConfig( "context" ) ) {
 
@@ -24,18 +26,23 @@ class StillerToast: StillerPluginInterface {
 
                         if( arg.has( "text" ) ){
 
-                            text = arg.getString( "text" )
+                            text = arg.get( "text" ).asString
                         }
 
-                        Toast.makeText( context, arg.get( "text" ).toString(), Toast.LENGTH_SHORT).show()
+                        val tt = "asdf"
+
+                        Toast.makeText( context, text, Toast.LENGTH_SHORT).show()
                     }
 
-                    return StillerObject()
+                    return jsonObject()
                 }
 
             }.alias()
-        }
+
+        )
+
 
         StillerApi.putInitialProperty(this.name as String, StillerProperty(toast))
     }
+
 }

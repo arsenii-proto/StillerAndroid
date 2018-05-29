@@ -20,5 +20,8 @@ class MainActivity : AppCompatActivity() {
 
         StillerEnabledPluginsList.startAll()
         StillerApi.init()
+
+
     }
+
 }

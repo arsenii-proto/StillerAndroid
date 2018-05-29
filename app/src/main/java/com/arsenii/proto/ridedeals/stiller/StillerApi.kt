@@ -4,7 +4,10 @@ import android.net.Uri
 import android.os.Build
 import android.util.Log
 import android.webkit.*
+import com.github.salomonbrys.kotson.jsonObject
+import com.github.salomonbrys.kotson.toJson
 import com.google.gson.Gson
+import com.google.gson.JsonObject
 import java.util.*
 
 object StillerApi {
@@ -14,10 +17,10 @@ object StillerApi {
     private val methods     = mutableMapOf<String,StillerMethod>()
     private val promises    = mutableListOf<String>()
     private val hooks       = mutableMapOf<String, MutableList<Runnable>>()
-    private val initial     = StillerObject {
-        "isAndroid" to true
+    private val initial: JsonObject = jsonObject (
+        "isAndroid" to true,
         "isIOS" to false
-    }
+    )
 
     fun putConfig(key: String, value: Any? ) {
 
@@ -82,15 +85,15 @@ object StillerApi {
 
     fun putInitialProperty( prop: String, value: StillerProperty ) {
 
-        this.initial.put( prop, value.alias() )
+        this.initial.add( prop, value.alias().toJson() )
     }
 
     fun putInitialMethod( name: String, method: StillerMethod ) {
 
-        this.initial.put( name, method.alias() )
+        this.initial.add( name, method.alias().toJson() )
     }
 
-    fun resolvePromise( pid: String, arg: StillerObject ) {
+    fun resolvePromise( pid: String, arg: JsonObject ) {
 
         if( this.hasConfig("web_app_wrapper") ) {
 
@@ -110,7 +113,7 @@ object StillerApi {
         }
     }
 
-    fun rejectPromise( pid: String, arg: StillerObject ){
+    fun rejectPromise( pid: String, arg: JsonObject ){
 
         if( this.hasConfig("web_app_wrapper") && this.hasConfig("web_app_client") ) {
 
@@ -197,22 +200,31 @@ object StillerApi {
     class StillerWebBridge {
 
 
+
+        @JavascriptInterface
+        fun debug(){
+
+            val debp = StillerApi.props
+            val debr = StillerApi.promises
+            val debm = StillerApi.methods
+
+            // Make debuger point here
+            val a = 1
+        }
+
         @JavascriptInterface
         fun initial() = StillerApi.initial.toString()
 
         @JavascriptInterface
-        fun getProp(id: String): StillerObject {
+        fun getProp(id: String): String {
 
             if (StillerApi.props.containsKey(id)) {
 
-                return StillerApi.props.get(id)!!.get()
+                return StillerApi.props.get(id)!!.get().toString()
 
             } else {
 
-                return StillerObject {
-
-                    "value" to "@undefined"
-                }
+                return jsonObject ( "value" to "@undefined" ).toString()
             }
 
         }
@@ -222,13 +234,13 @@ object StillerApi {
 
             if (StillerApi.props.containsKey(id)) {
 
-                StillerApi.props.get(id)!!.set(Gson().fromJson(arg, StillerObject::class.java))
+                StillerApi.props.get(id)!!.set(Gson().fromJson(arg, JsonObject::class.java))
             }
 
         }
 
         @JavascriptInterface
-        fun callMethode(id: String, arg: String): StillerObject {
+        fun callMethod(id: String, arg: String): String {
 
             if (StillerApi.methods.containsKey(id)) {
 
@@ -241,24 +253,18 @@ object StillerApi {
                     while (StillerApi.promises.contains(id))
                         pid = "${StillerApi.tokinize()}"
 
-                    method.perform(pid, Gson().fromJson(arg, StillerObject::class.java))
+                    method.perform(pid, Gson().fromJson(arg, JsonObject::class.java))
 
-                    return StillerObject {
-
-                        "result" to "@promise($pid)"
-                    }
+                    return jsonObject ("result" to "@promise($pid)").toString()
 
                 } else {
 
-                    return method.handle(Gson().fromJson(arg, StillerObject::class.java))
+                    return method.handle(Gson().fromJson(arg, JsonObject::class.java)).toString()
                 }
 
             } else {
 
-                return StillerObject {
-
-                    "result" to "@undefined"
-                }
+                return jsonObject ("result" to "@undefined").toString()
             }
         }
     }

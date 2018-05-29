@@ -1,5 +1,8 @@
 package com.arsenii.proto.ridedeals.stiller
 
+import com.github.salomonbrys.kotson.jsonObject
+import com.google.gson.JsonObject
+
 open class StillerMethod(
         private val promise: Boolean = false
     ) {
@@ -23,12 +26,12 @@ open class StillerMethod(
 
     fun ID() = this.id
 
-    open fun handle( arg: StillerObject ): StillerObject {
+    open fun handle( arg: JsonObject ): JsonObject {
 
-        return StillerObject{ "value" to null }
+        return jsonObject( "value" to null )
     }
 
-    open fun perform( pid: String, arg: StillerObject ) {
+    open fun perform( pid: String, arg: JsonObject ) {
 
         StillerApi.resolvePromise( pid, arg )
     }

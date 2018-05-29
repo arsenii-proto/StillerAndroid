@@ -1,7 +1,10 @@
 package com.arsenii.proto.ridedeals.stiller
 
+import com.github.salomonbrys.kotson.jsonObject
+import com.google.gson.JsonObject
+
 open class StillerProperty(
-        private var value: StillerObject = StillerObject { "value" to null },
+        private var value: JsonObject = jsonObject( "value" to null ),
         private val muttable: Boolean = true
 ) {
 
@@ -14,16 +17,16 @@ open class StillerProperty(
         StillerApi.addProp( this )
     }
 
-    open fun get(): StillerObject {
+    open fun get(): JsonObject {
 
         return this.value
     }
 
-    open fun set( value: StillerObject ) {
+    open fun set( value: JsonObject ) {
 
         if( this.muttable ) {
 
-            this.value.put( "value", value[ "value" ] )
+            this.value.add( "value", value[ "value" ] )
         }
 
     }
