@@ -1,13 +1,16 @@
 package com.arsenii.proto.ridedeals
 
-import com.arsenii.proto.ridedeals.stiller.StillerPluginInterface
-import com.arsenii.proto.ridedeals.stiller_plugins.StillerToast
+import com.arsenii.proto.ridedeals.stiller_plugins.*
 
 object StillerEnabledPluginsList {
 
-    val plugins = listOf<StillerPluginInterface>(
+    val plugins = listOf(
 
-            StillerToast()
+        StillerToast(),
+        StillerSplashScreen(),
+        StillerFireBase(),
+        StillerNavBar(),
+        StillerLocation()
     )
 
     fun startAll() {

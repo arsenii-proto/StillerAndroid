@@ -37,12 +37,36 @@ class StillerToast: StillerPluginInterface {
                     return jsonObject()
                 }
 
+            }.alias(),
+
+            "long" to object: StillerMethod(){
+
+                override fun handle(arg: JsonObject): JsonObject {
+
+                    if( StillerApi.hasConfig( "context" ) ) {
+
+                        val context = StillerApi.getConfig( "context" ) as Context
+                        var text    = "Text missing"
+
+                        if( arg.has( "text" ) ){
+
+                            text = arg.get( "text" ).asString
+                        }
+
+                        val tt = "asdf"
+
+                        Toast.makeText( context, text, Toast.LENGTH_LONG).show()
+                    }
+
+                    return jsonObject()
+                }
+
             }.alias()
 
         )
 
 
-        StillerApi.putInitialProperty(this.name as String, StillerProperty(toast))
+        StillerApi.putInitialProperty(this.name as String, StillerProperty(toast, false))
     }
 
 }

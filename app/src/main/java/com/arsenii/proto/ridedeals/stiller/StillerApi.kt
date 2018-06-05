@@ -15,11 +15,19 @@ object StillerApi {
     private val config      = mutableMapOf<String,Any?>()
     private val props       = mutableMapOf<String,StillerProperty>()
     private val methods     = mutableMapOf<String,StillerMethod>()
+    private val binders     = mutableMapOf<String,StillerBinder>()
     private val promises    = mutableListOf<String>()
     private val hooks       = mutableMapOf<String, MutableList<Runnable>>()
     private val initial: JsonObject = jsonObject (
         "isAndroid" to true,
-        "isIOS" to false
+        "isIOS" to false,
+        "locale" to object: StillerProperty() {
+
+            override fun get(): JsonObject {
+
+                return jsonObject("value" to Locale.getDefault().toString())
+            }
+        }.alias()
     )
 
     fun putConfig(key: String, value: Any? ) {
@@ -63,6 +71,18 @@ object StillerApi {
         this.methods.put( id, method )
 
         method.assignId( id )
+    }
+
+    fun addBinder( binder: StillerBinder ) {
+
+        var id = "${this.tokinize()}"
+
+        while( this.binders.containsKey( id ) )
+            id = "${this.tokinize()}"
+
+        this.binders.put( id, binder )
+
+        binder.assignId( id )
     }
 
     fun addHook(type: String, run: Runnable) {
@@ -133,6 +153,26 @@ object StillerApi {
         }
     }
 
+    fun dispatchEvent( bid: String, arg: JsonObject ){
+
+        if( this.hasConfig("web_app_wrapper") && this.hasConfig("web_app_client") ) {
+
+            val wrapper = this.getConfig("web_app_wrapper") as WebView
+            val web_app = this.getConfig("web_app_client") as String
+
+            wrapper.post {
+
+                wrapper.evaluateJavascript("(() => {" +
+                        "" +
+                        "$web_app.dispatchEvent('$bid','$arg')" +
+                        "" +
+                        "})()", ValueCallback {
+
+                })
+            }
+        }
+    }
+
     fun init() {
 
         if( this.hasConfig("web_app_wrapper") && this.hasConfig("web_app_url") && this.hasConfig("web_app_server") ) {
@@ -153,34 +193,10 @@ object StillerApi {
                 WebView.setWebContentsDebuggingEnabled(true);
             }
 
-            wrapper.loadUrl("")
-            val uri: Uri
-            try {
-                uri = buildUri(web_url)
-                wrapper.loadUrl(uri.toString())
-                Log.i("ADST", "web_url: $web_url")
-            } catch(e: UnsupportedOperationException) {
-                e.printStackTrace()
-            }
-
-            wrapper.loadUrl("javascript:alert('bleaha');")
-            wrapper.post {
-
-                wrapper.evaluateJavascript("alert('Bleadi')", ValueCallback {
-
-                })
-            }
+            wrapper.loadUrl(web_url)
 
             this.handleHooks("after-init")
         }
-    }
-
-    @Throws(UnsupportedOperationException::class)
-    private fun buildUri(authority: String): Uri {
-        val builder = Uri.Builder()
-        builder.scheme("https")
-                .authority(authority)
-        return builder.build()
     }
 
     private fun tokinize(): String {
@@ -265,6 +281,24 @@ object StillerApi {
             } else {
 
                 return jsonObject ("result" to "@undefined").toString()
+            }
+        }
+
+        @JavascriptInterface
+        fun startBinder(bid: String) {
+
+            if ( binders.containsKey( bid ) ) {
+
+                binders[bid]?.start()
+            }
+        }
+
+        @JavascriptInterface
+        fun stopBinder(bid: String) {
+
+            if ( binders.containsKey( bid ) ) {
+
+                binders[bid]?.stop()
             }
         }
     }
