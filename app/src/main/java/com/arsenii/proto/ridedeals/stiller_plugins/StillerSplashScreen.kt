@@ -22,7 +22,7 @@ class StillerSplashScreen: StillerPluginInterface {
 
             web_app_wrapper.post {
 
-                web_app_wrapper.visibility = View.GONE
+                web_app_wrapper.visibility = View.VISIBLE
             }
 
         }
