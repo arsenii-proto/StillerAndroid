@@ -9,7 +9,7 @@ object StillerEnabledPluginsList {
         StillerToast(),
         StillerSplashScreen(),
         StillerFireBase(),
-        StillerNavBar(),
+        StillerSizes(),
         StillerLocation()
     )
 

@@ -5,6 +5,7 @@ function Stiller(stiller) {
   const binders = {};
 
   const prepareProps = (obj, config) => {
+    console.log(config);
     if (typeof config !== "object" && typeof config === "string") {
       try {
         config = JSON.parse(config);
