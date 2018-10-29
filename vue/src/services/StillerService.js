@@ -5,7 +5,7 @@ function Stiller(stiller) {
   const binders = {};
 
   const prepareProps = (obj, config) => {
-    console.log(config);
+    // console.log(config);
     if (typeof config !== "object" && typeof config === "string") {
       try {
         config = JSON.parse(config);
@@ -203,25 +203,23 @@ function Stiller(stiller) {
   };
 }
 
+let service;
+
+if ("stiller" in window) {
+  if (
+    window.stiller.initial &&
+    window.stiller.getProp &&
+    window.stiller.setProp &&
+    window.stiller.callMethod
+  ) {
+    service = new Stiller(window.stiller);
+  }
+}
+
 export default {
   install: function(Vue) {
-    // console.log(process.env)
-
-    if (stiller in window) {
-      var stiller = window.stiller;
-
-      if (
-        stiller.initial &&
-        stiller.getProp &&
-        stiller.setProp &&
-        stiller.callMethod
-      ) {
-        return (Vue.prototype.$stiller = new Stiller(stiller));
-      }
-
-      console.error("stiller unsuported");
-    }
-
-    console.error("stiller unlocated:");
+    return (Vue.prototype.$stiller = service);
   }
 };
+
+export { service as Stiller };

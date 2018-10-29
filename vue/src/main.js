@@ -17,3 +17,4 @@ new Vue({
 }).$mount("#app");
 
 window.Vue = Vue;
+window.Store = store;

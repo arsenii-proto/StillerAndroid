@@ -3,6 +3,7 @@ package com.arsenii.proto.ridedeals.stiller_plugins.firebase
 import android.util.Log
 import com.arsenii.proto.ridedeals.MainActivity
 import com.arsenii.proto.ridedeals.stiller.StillerApi
+import com.arsenii.proto.ridedeals.stiller.StillerBinder
 import com.arsenii.proto.ridedeals.stiller.StillerMethod
 import com.arsenii.proto.ridedeals.stiller.StillerProperty
 import com.github.salomonbrys.kotson.jsonObject
@@ -22,7 +23,6 @@ object StillerFireBaseAuth {
 
     var auth = FirebaseAuth.getInstance()
     lateinit var verificationId: String
-
 
     init {
 
@@ -71,7 +71,7 @@ object StillerFireBaseAuth {
 
                             override fun perform(pid: String, arg: JsonObject) {
 
-                                user.getIdToken(true).addOnCompleteListener(OnCompleteListener {
+                                user.getIdToken(true).addOnCompleteListener {
 
                                     if( it.isSuccessful ) {
 
@@ -81,7 +81,7 @@ object StillerFireBaseAuth {
 
                                         StillerApi.rejectPromise(pid, jsonObject("value" to it.result.token))
                                     }
-                                })
+                                }
                             }
 
                         }.alias(),
@@ -163,6 +163,24 @@ object StillerFireBaseAuth {
                 return jsonObject("result" to  "successfully")
             }
 
+        }.alias(),
+
+        "onLogginStateChanged" to object: StillerBinder() {
+
+            val authStateListenner =  FirebaseAuth.AuthStateListener {
+                dispatch(jsonObject(
+                    "logged" to (auth.currentUser !== null)
+                ))
+            }
+
+            override fun start() {
+
+                auth.addAuthStateListener(authStateListenner)
+            }
+
+            override fun stop() {
+                auth.removeAuthStateListener(authStateListenner)
+            }
         }.alias()
 
     )
@@ -172,20 +190,19 @@ object StillerFireBaseAuth {
         if( p0 != null ) {
 
             auth.signInWithCredential(p0).addOnCompleteListener(
-                StillerApi.getConfig("context") as MainActivity,
-                OnCompleteListener {
+                StillerApi.getConfig("context") as MainActivity
+            ) {
 
-                    if( it.isSuccessful() ) {
+                if( it.isSuccessful() ) {
 
-                        StillerApi.resolvePromise(pid, jsonObject("result" to "successfully"))
+                    StillerApi.resolvePromise(pid, jsonObject("result" to "successfully"))
 
-                    } else {
+                } else {
 
-                        Log.i("ADNC", "WTF")
-                        StillerApi.rejectPromise(pid, jsonObject("result" to "error"))
-                    }
+                    Log.i("ADNC", "WTF")
+                    StillerApi.rejectPromise(pid, jsonObject("result" to "error"))
                 }
-            )
+            }
 
         } else {
 

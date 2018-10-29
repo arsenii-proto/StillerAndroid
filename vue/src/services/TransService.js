@@ -21,7 +21,7 @@ const trans = {
 
 export default {
   install: function(Vue) {
-    trans.lang = Vue.prototype.$stiller.locale.split("_")[0];
+    trans.lang = Vue.prototype.$stiller.firebase.auth.lang;
 
     Vue.prototype.trans = (...args) => trans.get.apply(null, args);
   }
