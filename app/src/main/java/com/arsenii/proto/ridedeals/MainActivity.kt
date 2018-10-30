@@ -28,8 +28,8 @@ class MainActivity : AppCompatActivity() {
 
         StillerApi.putConfig("context", this)
         StillerApi.putConfig("web_app_wrapper", web_wrapper)
-        StillerApi.putConfig("web_app_url", "http://192.168.25.101:8080")
-//        StillerApi.putConfig("web_app_url", "file:///android_asset/index.html")
+//        StillerApi.putConfig("web_app_url", "http://192.168.25.101:8080")
+        StillerApi.putConfig("web_app_url", "file:///android_asset/index.html")
         StillerApi.putConfig("web_app_server", "stiller")
         StillerApi.putConfig("web_app_client", "stiller")
         StillerApi.putConfig("url_whitelist", listOf( "gstatic.com" ))
